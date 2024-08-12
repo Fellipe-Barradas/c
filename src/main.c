@@ -44,6 +44,17 @@ struct HttpServer startHttpServer(){
     return sr;
 }
 
+char * getFilepath(char *buffer, regmatch_t *match){
+    int start = match->rm_so;
+    int end = match->rm_eo;
+    int length = end - 5 - start;
+    char * filepath;
+    filepath = (char *)malloc(length + 1);
+    strncpy(filepath, &buffer[start + 5], length);
+    filepath[length] = '\0';
+    return filepath;
+}
+
 void *handleClient(void *arg){
     int client_fd = *((int *)arg);
     char *buffer = (char *)malloc(BUFFER_SIZE * sizeof(char));
@@ -61,10 +72,9 @@ void *handleClient(void *arg){
     if (regexec(&regex, buffer, 2, match, 0) == 0) {
         // TODO - Extract filename from request and decode URL
         if (match[0].rm_so != -1) {
-            int start = match[0].rm_so;
-            int end = match[0].rm_eo;
-            buffer[end] = "\0";
-            printf("Match: %.*s\n", end - start, &buffer[start]);
+            // Guardando request dentro da variável request
+            char * filepath = getFilepath(buffer, &match[0]);
+            free(filepath);
         }
     } else {
         // TODO - Enviar resposta 404
